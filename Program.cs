@@ -1,4 +1,11 @@
+using Microsoft.EntityFrameworkCore;
+using evaluacion20262.Data;
+
 var builder = WebApplication.CreateBuilder(args);
+
+// Configuración de la base de datos SQLite con EF Core
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 // Add services to the container.
 builder.Services.AddControllersWithViews();
@@ -25,5 +32,11 @@ app.MapControllerRoute(
     pattern: "{controller=Home}/{action=Index}/{id?}")
     .WithStaticAssets();
 
+// Creación automática de la base de datos SQLite al iniciar
+using (var scope = app.Services.CreateScope())
+{
+    var context = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    context.Database.EnsureCreated();
+}
 
 app.Run();
